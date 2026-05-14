@@ -1,6 +1,6 @@
 # Data Engineer Technical Assessment
 ## Overview
-My name is Farid Alvin Fadillah, a freshgrad from Telkom University. My approach is different for each assestment, but i still mainly utilizing Ai. 
+My name is Farid Alvin Fadillah, a freshgrad from Telkom University. My approach is different for each assestment, but i still mainly utilizing Ai. More specifics and link is in README.md in each folder.
 - For the first assestment, i use ChatGPT to generate the schema, mockup, and the query needed. 
 
 - For the second assestment, i use VSCode and github copilot. I edit them in jupyter notebook (.ipynb) as i am comfortable using them, altough alternatively i also could have google colab. I use AI to generate the code that i requested, i provide the instructions and sometimes expected results. in the end, i export the resulting file as xlsx.
