@@ -1,0 +1,52 @@
+SELECT
+    sr.staff_id,
+    bd.branch_name,
+
+    -- Number of transactions handled
+    COUNT(st.transaction_id) AS total_transactions,
+
+    -- Total sales amount
+    COALESCE(SUM(st.total_amount), 0) AS total_sales_amount,
+
+    -- Average transaction value
+    ROUND(
+        COALESCE(AVG(st.total_amount), 0),
+        2
+    ) AS average_transaction_value,
+
+    -- Performance score
+    sr.performance_score
+
+FROM staff_records sr
+
+JOIN branch_details bd
+    ON sr.branch_code = bd.branch_code
+
+LEFT JOIN sales_transactions st
+    ON sr.staff_id = st.staff_id
+    AND YEAR(st.transaction_date) = 2023
+
+WHERE sr.resignation_date IS NULL
+
+GROUP BY
+    sr.staff_id,
+    bd.branch_name,
+    sr.performance_score
+
+ORDER BY total_sales_amount DESC;
+
+Hasil:
+
+| staff_id | branch_name            | total_transactions | total_sales_amount | average_transaction_value | performance_score |
+| -------- | ---------------------- | ------------------ | ------------------ | ------------------------- | ----------------- |
+| STF005   | Medan Branch           | 1                  | 220000.0           | 220000.0                  | 4.6               |
+| STF001   | Central Jakarta Branch | 1                  | 150000.0           | 150000.0                  | 4.8               |
+| STF007   | Bali Branch            | 1                  | 134000.0           | 134000.0                  | 4.3               |
+| STF002   | Bandung Branch         | 1                  | 120000.0           | 120000.0                  | 4.2               |
+| STF008   | Semarang Branch        | 1                  | 99000.0            | 99000.0                   | 4.4               |
+| STF003   | Surabaya Branch        | 1                  | 95000.0            | 95000.0                   | 4.0               |
+| STF010   | Balikpapan Branch      | 1                  | 89000.0            | 89000.0                   | 4.1               |
+| STF004   | Yogyakarta Branch      | 1                  | 87000.0            | 87000.0                   | 4.5               |
+| STF006   | Makassar Branch        | 1                  | 76000.0            | 76000.0                   | 3.9               |
+
+---

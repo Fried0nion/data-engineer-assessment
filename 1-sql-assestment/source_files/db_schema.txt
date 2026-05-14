@@ -1,0 +1,239 @@
+-- Stores information about retail branches
+CREATE TABLE branch_details (
+branch_code VARCHAR(10) PRIMARY KEY,
+branch_name VARCHAR(100),
+region_id INT,
+operation_start_date DATE,
+is_active BOOLEAN,
+max_capacity INT,
+last_renovation_date DATE
+);
+-- Staff information across branches
+CREATE TABLE staff_records (
+staff_id VARCHAR(15) PRIMARY KEY,
+branch_code VARCHAR(10),
+join_date DATE,
+role_code VARCHAR(5),
+base_salary DECIMAL(12,2),
+supervisor_id VARCHAR(15),
+resignation_date DATE,
+performance_score DECIMAL(3,2),
+FOREIGN KEY (branch_code) REFERENCES branch_details(branch_code)
+);
+-- Product catalog with hierarchical categories
+CREATE TABLE product_hierarchy (
+product_code VARCHAR(20) PRIMARY KEY,
+product_name VARCHAR(100),
+category_l1 VARCHAR(50), -- Main category
+category_l2 VARCHAR(50), -- Sub-category
+category_l3 VARCHAR(50), -- Detailed category
+unit_cost DECIMAL(12,2),
+unit_price DECIMAL(12,2),
+supplier_id VARCHAR(10),
+minimum_stock INT,
+is_perishable BOOLEAN
+);
+-- Daily inventory movements
+CREATE TABLE inventory_movements (
+movement_id BIGINT PRIMARY KEY,
+product_code VARCHAR(20), branch_code VARCHAR(10),
+transaction_type CHAR(3), -- IN, OUT, ADJ (adjustment), RTN (return), EXP (expired)
+quantity INT,
+transaction_date DATE,
+batch_number VARCHAR(20),
+expiry_date DATE,
+unit_cost_at_time DECIMAL(12,2),
+FOREIGN KEY (product_code) REFERENCES product_hierarchy(product_code),
+FOREIGN KEY (branch_code) REFERENCES branch_details(branch_code)
+);
+-- Sales transactions
+CREATE TABLE sales_transactions (
+transaction_id VARCHAR(30) PRIMARY KEY,
+branch_code VARCHAR(10),
+transaction_date TIMESTAMP,
+staff_id VARCHAR(15),
+payment_method VARCHAR(10),
+total_amount DECIMAL(12,2),
+discount_amount DECIMAL(12,2),
+loyalty_points_earned INT,
+loyalty_points_redeemed INT,
+customer_id VARCHAR(20),
+FOREIGN KEY (branch_code) REFERENCES branch_details(branch_code),
+FOREIGN KEY (staff_id) REFERENCES staff_records(staff_id)
+);
+-- Sales transaction details
+CREATE TABLE sales_line_items (
+transaction_id VARCHAR(30),
+line_number INT,
+product_code VARCHAR(20),
+quantity INT,
+unit_price_at_time DECIMAL(12,2),
+discount_percentage DECIMAL(5,2),
+total_line_amount DECIMAL(12,2),
+PRIMARY KEY (transaction_id, line_number),
+FOREIGN KEY (transaction_id) REFERENCES sales_transactions(transaction_id),
+FOREIGN KEY (product_code) REFERENCES product_hierarchy(product_code)
+);
+
+
+
+-- =========================================
+-- INSERT branch_details
+-- =========================================
+INSERT INTO branch_details VALUES
+('BR001', 'Central Jakarta Branch', 1, '2018-01-15', TRUE, 500, '2024-01-01'),
+('BR002', 'Bandung Branch', 2, '2019-03-10', TRUE, 450, '2024-02-15'),
+('BR003', 'Surabaya Branch', 3, '2020-06-20', TRUE, 550, '2024-03-10'),
+('BR004', 'Yogyakarta Branch', 2, '2017-09-05', TRUE, 350, '2023-12-01'),
+('BR005', 'Medan Branch', 4, '2021-11-11', TRUE, 300, '2024-04-12'),
+('BR006', 'Makassar Branch', 5, '2022-07-07', TRUE, 400, '2024-01-18'),
+('BR007', 'Bali Branch', 6, '2016-12-25', TRUE, 600, '2024-02-22'),
+('BR008', 'Semarang Branch', 2, '2019-05-17', TRUE, 420, '2024-03-05'),
+('BR009', 'Palembang Branch', 7, '2020-10-10', FALSE, 280, '2024-04-01'),
+('BR010', 'Balikpapan Branch', 8, '2023-01-01', TRUE, 390, '2024-05-01');
+
+-- =========================================
+-- INSERT staff_records
+-- =========================================
+INSERT INTO staff_records VALUES
+('STF001', 'BR001', '2020-01-10', 'MGR', 15000000, 'STF001', NULL, 4.80),
+('STF002', 'BR002', '2021-02-11', 'CAS', 5500000, 'STF001', NULL, 4.20),
+('STF003', 'BR003', '2022-03-12', 'SAL', 6200000, 'STF001', NULL, 4.00),
+('STF004', 'BR004', '2021-04-13', 'INV', 7000000, 'STF001', NULL, 4.50),
+('STF005', 'BR005', '2020-05-14', 'SUP', 8500000, 'STF001', NULL, 4.60),
+('STF006', 'BR006', '2023-06-15', 'CAS', 5000000, 'STF005', NULL, 3.90),
+('STF007', 'BR007', '2022-07-16', 'SAL', 6100000, 'STF005', NULL, 4.30),
+('STF008', 'BR008', '2021-08-17', 'INV', 7100000, 'STF005', NULL, 4.40),
+('STF009', 'BR009', '2020-09-18', 'CAS', 5300000, 'STF005', '2025-01-01', 3.70),
+('STF010', 'BR010', '2024-01-01', 'SAL', 6000000, 'STF005', NULL, 4.10);
+
+-- =========================================
+-- INSERT product_hierarchy
+-- =========================================
+INSERT INTO product_hierarchy VALUES
+('PRD001', 'Ultra Milk 1L', 'Beverages', 'Milk', 'Dairy Milk', 12000, 15000, 'SUP001', 50, TRUE),
+('PRD002', 'Indomie Goreng', 'Food', 'Instant Noodles', 'Fried Noodles', 2500, 3500, 'SUP002', 100, FALSE),
+('PRD003', 'Pocari Sweat 500ml', 'Beverages', 'Isotonic', 'Sports Drink', 6000, 8500, 'SUP003', 75, TRUE),
+('PRD004', 'Oreo Vanilla', 'Snacks', 'Biscuits', 'Cream Biscuit', 7000, 9500, 'SUP004', 40, FALSE),
+('PRD005', 'Fresh Apple', 'Fruits', 'Imported Fruits', 'Apple', 10000, 14000, 'SUP005', 60, TRUE),
+('PRD006', 'Cooking Oil 2L', 'Household', 'Kitchen Needs', 'Oil', 28000, 34000, 'SUP006', 30, FALSE),
+('PRD007', 'Mineral Water 600ml', 'Beverages', 'Water', 'Mineral Water', 2000, 4000, 'SUP007', 120, FALSE),
+('PRD008', 'Chocolate Bread', 'Bakery', 'Bread', 'Sweet Bread', 5000, 8000, 'SUP008', 25, TRUE),
+('PRD009', 'Shampoo 170ml', 'Personal Care', 'Hair Care', 'Shampoo', 15000, 21000, 'SUP009', 35, FALSE),
+('PRD010', 'Frozen Nuggets', 'Frozen Food', 'Chicken', 'Nuggets', 32000, 42000, 'SUP010', 20, TRUE);
+
+-- =========================================
+-- INSERT inventory_movements
+-- LAST 3 MONTHS DATA
+-- =========================================
+INSERT INTO inventory_movements VALUES
+(1001, 'PRD001', 'BR001', 'IN', 100, '2026-03-01', 'B001', '2026-09-01', 12000),
+(1002, 'PRD001', 'BR001', 'OUT', 40, '2026-03-10', 'B001', '2026-09-01', 12000),
+
+(1003, 'PRD002', 'BR002', 'IN', 200, '2026-03-05', 'B002', '2027-03-05', 2500),
+(1004, 'PRD002', 'BR002', 'OUT', 150, '2026-03-20', 'B002', '2027-03-05', 2500),
+
+(1005, 'PRD003', 'BR003', 'IN', 120, '2026-04-01', 'B003', '2026-10-01', 6000),
+(1006, 'PRD003', 'BR003', 'OUT', 80, '2026-04-10', 'B003', '2026-10-01', 6000),
+
+(1007, 'PRD004', 'BR004', 'IN', 90, '2026-04-05', 'B004', '2027-04-05', 7000),
+(1008, 'PRD004', 'BR004', 'EXP', 10, '2026-04-20', 'B004', '2026-04-19', 7000),
+
+(1009, 'PRD005', 'BR005', 'IN', 70, '2026-05-01', 'B005', '2026-05-30', 10000),
+(1010, 'PRD005', 'BR005', 'OUT', 50, '2026-05-10', 'B005', '2026-05-30', 10000);
+
+-- =========================================
+-- INSERT sales_transactions
+-- =========================================
+INSERT INTO sales_transactions VALUES
+('TRX001', 'BR001', '2026-03-01 10:00:00', 'STF001', 'CASH', 150000, 5000, 15, 0, 'CUST001'),
+('TRX002', 'BR002', '2026-03-05 11:00:00', 'STF002', 'CARD', 120000, 2000, 12, 1, 'CUST002'),
+('TRX003', 'BR003', '2026-03-10 12:00:00', 'STF003', 'QRIS', 95000, 0, 9, 0, 'CUST003'),
+('TRX004', 'BR004', '2026-03-15 13:00:00', 'STF004', 'CASH', 87000, 3000, 8, 2, 'CUST004'),
+('TRX005', 'BR005', '2026-04-01 14:00:00', 'STF005', 'CARD', 220000, 10000, 22, 5, 'CUST005'),
+('TRX006', 'BR006', '2026-04-05 15:00:00', 'STF006', 'QRIS', 76000, 1000, 7, 0, 'CUST006'),
+('TRX007', 'BR007', '2026-04-10 16:00:00', 'STF007', 'CASH', 134000, 4000, 13, 1, 'CUST007'),
+('TRX008', 'BR008', '2026-04-15 17:00:00', 'STF008', 'CARD', 99000, 5000, 9, 2, 'CUST008'),
+('TRX009', 'BR009', '2026-05-01 18:00:00', 'STF009', 'QRIS', 143000, 6000, 14, 4, 'CUST009'),
+('TRX010', 'BR010', '2026-05-05 19:00:00', 'STF010', 'CASH', 89000, 3000, 8, 1, 'CUST010');
+
+-- =========================================
+-- INSERT sales_line_items
+-- =========================================
+INSERT INTO sales_line_items VALUES
+('TRX001', 1, 'PRD001', 5, 15000, 5.00, 71250),
+('TRX002', 1, 'PRD002', 10, 3500, 0.00, 35000),
+('TRX003', 1, 'PRD003', 8, 8500, 10.00, 61200),
+('TRX004', 1, 'PRD004', 3, 9500, 0.00, 28500),
+('TRX005', 1, 'PRD005', 10, 14000, 5.00, 133000),
+('TRX006', 1, 'PRD006', 2, 34000, 7.00, 63240),
+('TRX007', 1, 'PRD007', 20, 4000, 0.00, 80000),
+('TRX008', 1, 'PRD008', 6, 8000, 0.00, 48000),
+('TRX009', 1, 'PRD009', 4, 21000, 8.00, 77280),
+('TRX010', 1, 'PRD010', 2, 42000, 5.00, 79800);
+
+-- =========================================
+-- ADDITIONAL SALES TRANSACTIONS
+-- =========================================
+
+INSERT INTO sales_transactions VALUES
+('TRX011', 'BR001', '2026-05-11 10:00:00', 'STF001', 'CASH', 55000, 0, 5, 0, 'CUST011'),
+('TRX012', 'BR001', '2026-05-11 11:00:00', 'STF001', 'CARD', 62000, 0, 6, 0, 'CUST012'),
+('TRX013', 'BR002', '2026-05-11 12:00:00', 'STF002', 'QRIS', 70000, 0, 7, 0, 'CUST013'),
+('TRX014', 'BR002', '2026-05-11 13:00:00', 'STF002', 'CASH', 68000, 0, 6, 0, 'CUST014'),
+('TRX015', 'BR003', '2026-05-11 14:00:00', 'STF003', 'CARD', 72000, 0, 7, 0, 'CUST015'),
+('TRX016', 'BR003', '2026-05-11 15:00:00', 'STF003', 'QRIS', 81000, 0, 8, 0, 'CUST016'),
+('TRX017', 'BR004', '2026-05-11 16:00:00', 'STF004', 'CASH', 59000, 0, 5, 0, 'CUST017'),
+('TRX018', 'BR005', '2026-05-11 17:00:00', 'STF005', 'CARD', 76000, 0, 7, 0, 'CUST018'),
+('TRX019', 'BR005', '2026-05-11 18:00:00', 'STF005', 'QRIS', 83000, 0, 8, 0, 'CUST019'),
+('TRX020', 'BR001', '2026-05-11 19:00:00', 'STF001', 'CASH', 91000, 0, 9, 0, 'CUST020');
+
+-- =========================================
+-- ADDITIONAL SALES LINE ITEMS
+-- PURPOSE:
+-- Make product pairs appear >=10 times
+-- Main frequent pair:
+-- PRD001 + PRD002
+-- =========================================
+
+INSERT INTO sales_line_items VALUES
+
+-- TRX011
+('TRX011', 1, 'PRD001', 1, 15000, 0, 15000),
+('TRX011', 2, 'PRD002', 2, 3500, 0, 7000),
+
+-- TRX012
+('TRX012', 1, 'PRD001', 1, 15000, 0, 15000),
+('TRX012', 2, 'PRD002', 3, 3500, 0, 10500),
+
+-- TRX013
+('TRX013', 1, 'PRD001', 2, 15000, 0, 30000),
+('TRX013', 2, 'PRD002', 1, 3500, 0, 3500),
+
+-- TRX014
+('TRX014', 1, 'PRD001', 1, 15000, 0, 15000),
+('TRX014', 2, 'PRD002', 4, 3500, 0, 14000),
+
+-- TRX015
+('TRX015', 1, 'PRD001', 2, 15000, 0, 30000),
+('TRX015', 2, 'PRD002', 2, 3500, 0, 7000),
+
+-- TRX016
+('TRX016', 1, 'PRD001', 1, 15000, 0, 15000),
+('TRX016', 2, 'PRD002', 5, 3500, 0, 17500),
+
+-- TRX017
+('TRX017', 1, 'PRD001', 3, 15000, 0, 45000),
+('TRX017', 2, 'PRD002', 1, 3500, 0, 3500),
+
+-- TRX018
+('TRX018', 1, 'PRD001', 1, 15000, 0, 15000),
+('TRX018', 2, 'PRD002', 2, 3500, 0, 7000),
+
+-- TRX019
+('TRX019', 1, 'PRD001', 2, 15000, 0, 30000),
+('TRX019', 2, 'PRD002', 2, 3500, 0, 7000),
+
+-- TRX020
+('TRX020', 1, 'PRD001', 1, 15000, 0, 15000),
+('TRX020', 2, 'PRD002', 3, 3500, 0, 10500);

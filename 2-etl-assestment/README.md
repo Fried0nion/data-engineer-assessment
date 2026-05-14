@@ -1,2 +1,2 @@
-This was worked in around less2 days. Instructions were a bit vague as there is no "Data Raw Funcloc 1.xlsx", and whether i should export as a new xlsx file or edit already existing ones.
-the result is in: data-engineer-assessment\2-etl-assestment\data\sorted_df.xlsx
+-This was worked in around less than 2 days. Instructions were a bit vague as there is no "Data Raw Funcloc 1.xlsx", and whether i should export as a new xlsx file or edit already existing ones.
+- the result is in: data-engineer-assessment\2-etl-assestment\data\sorted_df.xlsx

@@ -1,0 +1,87 @@
+SELECT
+    bd.branch_name,
+
+    COALESCE(SUM(
+        CASE 
+            WHEN im.transaction_type = 'IN'
+            THEN im.quantity
+            ELSE 0
+        END
+    ), 0) AS total_incoming_stock,
+
+    COALESCE(SUM(
+        CASE 
+            WHEN im.transaction_type = 'OUT'
+            THEN im.quantity
+            ELSE 0
+        END
+    ), 0) AS total_outgoing_stock,
+
+    COALESCE(SUM(
+        CASE
+            WHEN im.transaction_type = 'IN' THEN im.quantity
+            WHEN im.transaction_type = 'OUT' THEN -im.quantity
+            WHEN im.transaction_type = 'RTN' THEN im.quantity
+            WHEN im.transaction_type = 'ADJ' THEN im.quantity
+            WHEN im.transaction_type = 'EXP' THEN -im.quantity
+            ELSE 0
+        END
+    ), 0) AS current_stock_level,
+
+    COALESCE(SUM(
+        CASE
+            WHEN im.transaction_type = 'EXP'
+            THEN im.quantity
+            ELSE 0
+        END
+    ), 0) AS expired_items,
+
+    ROUND(
+        COALESCE(SUM(
+            CASE
+                WHEN im.transaction_type = 'OUT'
+                THEN im.quantity
+                ELSE 0
+            END
+        ), 0)
+        /
+        NULLIF(
+            COALESCE(SUM(
+                CASE
+                    WHEN im.transaction_type = 'IN'
+                    THEN im.quantity
+                    ELSE 0
+                END
+            ), 0),
+            0
+        ),
+        2
+    ) AS stock_turnover_rate
+
+FROM branch_details bd
+
+LEFT JOIN inventory_movements im
+    ON bd.branch_code = im.branch_code
+    AND im.transaction_date >= CURRENT_DATE - INTERVAL 3 MONTH
+
+GROUP BY bd.branch_code, bd.branch_name
+
+ORDER BY stock_turnover_rate DESC;
+
+Hasil:
+
+| branch_name            | total_incoming_stock | total_outgoing_stock | current_stock_level | expired_items | stock_turnover_rate |
+| ---------------------- | -------------------- | -------------------- | ------------------- | ------------- | ------------------- |
+| Bandung Branch         | 200                  | 150                  | 50                  | 0             | 0.75                |
+| Medan Branch           | 70                   | 50                   | 20                  | 0             | 0.71                |
+| Surabaya Branch        | 120                  | 80                   | 40                  | 0             | 0.67                |
+| Central Jakarta Branch | 100                  | 40                   | 60                  | 0             | 0.4                 |
+| Yogyakarta Branch      | 90                   | 0                    | 80                  | 10            | 0.0                 |
+| Palembang Branch       | 0                    | 0                    | 0                   | 0             |                     |
+| Semarang Branch        | 0                    | 0                    | 0                   | 0             |                     |
+| Bali Branch            | 0                    | 0                    | 0                   | 0             |                     |
+| Makassar Branch        | 0                    | 0                    | 0                   | 0             |                     |
+| Balikpapan Branch      | 0                    | 0                    | 0                   | 0             |                     |
+
+---
+

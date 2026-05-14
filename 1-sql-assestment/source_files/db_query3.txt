@@ -1,0 +1,30 @@
+SELECT
+    ph1.product_name AS product_1,
+    ph1.category_l1 AS category_1,
+
+    ph2.product_name AS product_2,
+    ph2.category_l1 AS category_2,
+
+    COUNT(*) AS co_occurrence_frequency
+
+FROM sales_line_items sli1
+
+JOIN sales_line_items sli2
+    ON sli1.transaction_id = sli2.transaction_id
+    AND sli1.product_code < sli2.product_code
+
+JOIN product_hierarchy ph1
+    ON sli1.product_code = ph1.product_code
+
+JOIN product_hierarchy ph2
+    ON sli2.product_code = ph2.product_code
+
+GROUP BY
+    ph1.product_name,
+    ph1.category_l1,
+    ph2.product_name,
+    ph2.category_l1
+
+HAVING COUNT(*) >= 10
+
+ORDER BY co_occurrence_frequency DESC;

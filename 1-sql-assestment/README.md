@@ -1,0 +1,5 @@
+- db schema and query is in source_files. worked on [fiddle](https://www.db-fiddle.com/)
+- the second query asks for active staff (no resignation date) in 2023, but since the mockup data is in 2026, second query give no results. So i change the query date to 2026.
+- Apparently, for the "Intermediate" third query, more mockup data is needed, so i use ChatGPT to generate more.
+- ChatGPT chat history: [ChatGPT](https://chatgpt.com/share/6a05c244-f94c-83ec-b665-20df034cd2d0)
+- I personally think that there is a lot possible visualizations: distribution of certain product sales in each branch that could help which branch sells the most, line chart of transactions of each branch (bar chart for comparison of each branch), and pie chart for most selling product
